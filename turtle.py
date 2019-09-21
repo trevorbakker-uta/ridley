@@ -8,6 +8,7 @@ from turtle_log     import Log
 from selenium.webdriver.common.action_chains import ActionChains
 import pandas as pd
 import os
+import re
 
 class Driver:
     PHANTOM = 1
@@ -275,13 +276,15 @@ class Turtle:
             self.log.append_exception(exp)
             return False
     
-    def get_comments( self, path, img ):
+    def get_comments( self, path, pic_user ):
 
         self._driver.get(path) #go to first picture
+        p = re.split("[/]",path)
+        comment_str = p[-2]
+        comment_file_path = 'pictures/' + pic_user + '/' + comment_str + '.html'
+        f = open( comment_file_path, "w+")
 
-        print(path)
-
-# \TODO split the post path and write the comments to the image id
+        f.write('<meta charset="UTF-8">')
 
         # approximately 12 comments per page
         click_count=0
@@ -311,6 +314,11 @@ class Turtle:
 
             user = c.find_element_by_class_name("TlrDj").get_attribute("textContent")
             print("" + user + ": " + str(comment))
+            comment_text = '<p>' + user + ": " + str(comment) + '</p> <br>'
+
+
+            f.write( comment_text )
+
             comments_list.append(comment)
             users_list.append(user)
     
@@ -319,7 +327,8 @@ class Turtle:
             df.to_csv("instagram_comments.csv", index=False)
 
     
-    
+        f.close()
+ 
     # Download all pictures | return : 0 or Total_Downloaded_Photo_Number
     def download_photos(self, pic_user_folder_name, download_choice = Download_Choice.UPDATE, download_photo_number = 0, download_video = True):
         if not self._status_links:
@@ -438,13 +447,22 @@ class Turtle:
                     filestr = ' <img src="' + '../' + path + '"alt="'+time+'" width="320" height="320">\n'
                     self.file.write(filestr)
                     self.file.write("   </a>\n")
-                    self.file.write("<div class=""desc"">Add a description of the image here</div>\n")
 
-# \TODO Add a link to the comments here
+                    p = re.split("[/]",link)
+                    comment_str = p[-2]
+                    print (comment_str)
+
+# TODO Add the picture date
+
+                    comment_str = '<div class="desc"><a href="' +pic_user_folder_name+ '/'+ comment_str +  '.html' + '">Caption and Comments</a></div>\n'
+                    self.file.write(comment_str)
 
                     self.file.write("</div>\n")
 
-                    self.get_comments(link, img_link)
+                    #self._driver.get(link) 
+
+                    print(link)
+                    self.get_comments(link, pic_user_folder_name)
 
                 # Info
                 self.log.append("> " + str(idx + 1) + " / " + str(total_download) + " stories downloaded...")
