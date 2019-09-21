@@ -5,6 +5,8 @@ from urllib.request import urlretrieve
 from time           import sleep
 from datetime       import datetime
 from turtle_log     import Log
+from selenium.webdriver.common.action_chains import ActionChains
+import pandas as pd
 import os
 
 class Driver:
@@ -273,6 +275,51 @@ class Turtle:
             self.log.append_exception(exp)
             return False
     
+    def get_comments( self, path, img ):
+
+        self._driver.get(path) #go to first picture
+
+        print(path)
+
+# \TODO split the post path and write the comments to the image id
+
+        # approximately 12 comments per page
+        click_count=0
+
+        while (1):
+            try:
+                load_more = self._driver.find_element_by_class_name("glyphsSpriteCircle_add__outline__24__grey_9.u-__7")
+                actions.move_to_element(load_more).perform()
+                load_more.click()
+                click_count+=1
+                time.sleep(2)
+            except Exception as e:
+                print(e)
+                break
+        
+        print("final click count: " + str(click_count) + "; should yield roughly " + str(click_count*12) + " comments")
+
+        comments = self._driver.find_elements_by_class_name("C4VMK")
+    
+        comments_list, users_list = [], []
+    
+        for c in comments:
+            comment = c.find_element_by_css_selector('span').get_attribute("textContent")
+
+            if comment == "Verified":
+                comment = c.find_element_by_css_selector('span:nth-child(2)').get_attribute("textContent")
+
+            user = c.find_element_by_class_name("TlrDj").get_attribute("textContent")
+            print("" + user + ": " + str(comment))
+            comments_list.append(comment)
+            users_list.append(user)
+    
+            df = pd.DataFrame({"user": users_list, "comment": comments_list})
+            
+            df.to_csv("instagram_comments.csv", index=False)
+
+    
+    
     # Download all pictures | return : 0 or Total_Downloaded_Photo_Number
     def download_photos(self, pic_user_folder_name, download_choice = Download_Choice.UPDATE, download_photo_number = 0, download_video = True):
         if not self._status_links:
@@ -313,6 +360,7 @@ class Turtle:
 
                 # Go To Link
                 self._driver.get(link)
+
 
                 # Get Photo Taken Date
                 post_date = self._driver.find_element_by_tag_name("time").get_attribute("datetime").split("T")[0]; 
@@ -391,7 +439,12 @@ class Turtle:
                     self.file.write(filestr)
                     self.file.write("   </a>\n")
                     self.file.write("<div class=""desc"">Add a description of the image here</div>\n")
+
+# \TODO Add a link to the comments here
+
                     self.file.write("</div>\n")
+
+                    self.get_comments(link, img_link)
 
                 # Info
                 self.log.append("> " + str(idx + 1) + " / " + str(total_download) + " stories downloaded...")
@@ -419,6 +472,8 @@ class Turtle:
             self.log.append_exception(exp)
             self.result = False
             return 0
+
+
 
 class Turtle_Quick:
 
