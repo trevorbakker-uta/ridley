@@ -177,8 +177,6 @@ class Turtle:
             count = 0
             error = 0
 
-            # AND date is not before start
-            # while len(imgLinks) != photo_total # and time != start:
             while len(imgLinks) != photo_total and len(imgLinks) < 300:
                 # Find all photos of current page
                 imgList = self._driver.find_elements_by_css_selector(".v1Nh3 a")
@@ -186,7 +184,6 @@ class Turtle:
                 # Add the photos to list if not exists
                 for idx, img in enumerate(imgList):
                     _link = img.get_property("href")
-                    #print(_link)
                     if not _link in imgLinks:
                         imgLinks.append(_link)
                 
@@ -313,8 +310,7 @@ class Turtle:
                 comment = c.find_element_by_css_selector('span:nth-child(2)').get_attribute("textContent")
 
             user = c.find_element_by_class_name("TlrDj").get_attribute("textContent")
-            print("" + user + ": " + str(comment))
-            comment_text = '<p>' + user + ": " + str(comment) + '</p> <br>'
+            comment_text = '<p>@' + user + ": " + str(comment) + '</p> <br>'
 
 
             f.write( comment_text )
@@ -376,8 +372,13 @@ class Turtle:
                 post_datetime = datetime.strptime( post_date, '%Y-%m-%d')
                 start_datetime = datetime.strptime( self._start, '%Y-%m-%d')
                 time = self._driver.find_element_by_tag_name("time").get_attribute("datetime").split("T")[0] + "_"
-               
-                if post_datetime == start_datetime: break 
+                end_datetime = datetime.strptime( self._end, '%Y-%m-%d')
+              
+                # if we've gone far enough back then stop 
+                if post_datetime < start_datetime: break 
+
+                # if we've not gone far enough then skip it
+                if post_datetime > end_datetime: continue
                 
                 # If page has many photos
                 try:
@@ -441,8 +442,12 @@ class Turtle:
                         if just_last_photos: done = True
                         already_exists_number += 1
                 
+                    post_date = self._driver.find_element_by_tag_name("time").get_attribute("datetime").split("T")[0]; 
+                    post_datetime = datetime.strptime( post_date, '%Y-%m-%d')
+                    date_string = post_datetime.strftime('%b %d %Y')
+
                     self.file.write("<div class=""gallery"">\n")
-                    filestr = '<a target="_blank" href=\"' + name + '">\n'
+                    filestr = '<a target="_blank" href=\"' + '../' + path + '">\n'
                     self.file.write(filestr)
                     filestr = ' <img src="' + '../' + path + '"alt="'+time+'" width="320" height="320">\n'
                     self.file.write(filestr)
@@ -450,18 +455,20 @@ class Turtle:
 
                     p = re.split("[/]",link)
                     comment_str = p[-2]
-                    print (comment_str)
 
-# TODO Add the picture date
-
-                    comment_str = '<div class="desc"><a href="' +pic_user_folder_name+ '/'+ comment_str +  '.html' + '">Caption and Comments</a></div>\n'
+                    comment_str = '<div class="desc"><a href="' +pic_user_folder_name+ '/'+ comment_str +  '.html' + '">' + date_string + ': Caption and Comments</a></div>\n'
                     self.file.write(comment_str)
+
+                    likes = self._driver.find_elements_by_class_name("Nm9Fw")
+                    for l in likes:
+                        likes_span = l.find_element_by_css_selector('span').get_attribute("textContent")
+                        print(likes_span)
+
+                    likes_str = '<div class="desc">'+'Likes: '+ likes_span +'</div>\n'
+                    self.file.write(likes_str)
 
                     self.file.write("</div>\n")
 
-                    #self._driver.get(link) 
-
-                    print(link)
                     self.get_comments(link, pic_user_folder_name)
 
                 # Info
