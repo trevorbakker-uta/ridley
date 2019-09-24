@@ -234,7 +234,7 @@ class Turtle:
                 self._pic_user_vid_path = vid_path
 
 
-            self.file = open( path + "index.html", "w+" )
+            self.file = open( path + "_index.html", "w+" )
             self.file.write("<!DOCTYPE html>\n")
             self.file.write("<html>\n")
             self.file.write("<head>\n")
@@ -388,6 +388,7 @@ class Turtle:
                         
                         if is_video:   
                             # Video check
+                            print("1. Found a video\n");
                             if not download_video: continue
 
                             img_link = self._driver.execute_script('return window._sharedData.entry_data.PostPage[0].graphql.shortcode_media.edge_sidecar_to_children.edges[' + str(i) +'].node.video_url')
@@ -416,10 +417,11 @@ class Turtle:
                         # If it is a video
                         img_link = self._driver.find_element_by_tag_name("video").get_attribute("src")
                         is_video = True
-                        printf("Found a video\n");
+                        print("Found a video\n");
                         # Video Download allowed check
                         if not download_video: continue
                     except:
+                        print("Found an image\n");
                         # Get Picture URL
                         tag = self._driver.find_element_by_css_selector('meta[property="og:image"]')
                         img_link = tag.get_property("content")
@@ -447,11 +449,19 @@ class Turtle:
                     date_string = post_datetime.strftime('%b %d %Y')
 
                     self.file.write("<div class=""gallery"">\n")
-                    filestr = '<a target="_blank" href=\"' + '../' + path + '">\n'
-                    self.file.write(filestr)
-                    filestr = ' <img src="' + '../' + path + '"alt="'+time+'" width="320" height="320">\n'
-                    self.file.write(filestr)
-                    self.file.write("   </a>\n")
+
+                    if is_video:
+                        videostr = '<video width="320" height="320" controls>'
+                        self.file.write(videostr)
+                        videostr = '<source src="../' + path + '" type="video/mp4">'
+                        self.file.write(videostr)
+                        self.file.write('</video>')
+                    else:
+                        filestr = '<a target="_blank" href=\"' + '../' + path + '">\n'
+                        self.file.write(filestr)
+                        filestr = ' <img src="' + '../' + path + '"alt="'+time+'" width="320" height="320">\n'
+                        self.file.write(filestr)
+                        self.file.write("   </a>\n")
 
                     p = re.split("[/]",link)
                     comment_str = p[-2]
@@ -464,8 +474,8 @@ class Turtle:
                         likes_span = l.find_element_by_css_selector('span').get_attribute("textContent")
                         print(likes_span)
 
-                    likes_str = '<div class="desc">'+'Likes: '+ likes_span +'</div>\n'
-                    self.file.write(likes_str)
+                        likes_str = '<div class="desc">'+'Likes: '+ likes_span +'</div>\n'
+                        self.file.write(likes_str)
 
                     self.file.write("</div>\n")
 
