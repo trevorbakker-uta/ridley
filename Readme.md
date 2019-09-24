@@ -1,5 +1,4 @@
 ## Ridley ( A modified Turtle Instagram Photo Downloader)
-.
 - Your username and your password won't be stored.
 - Whether or not you have two factor authentication in your Instagram account or not, this will still work.
 - It uses `Selenium` and `Chrome`
@@ -58,6 +57,12 @@ optional arguments:
                     Download
   -s, --start       The start date to start saving posts
   -e, --end         The end date to start saving posts
+  
+  For example, to save posts from 1/3/19 to 3/3/19 and my user account is tbakker with password "mypassword"
+  
+  python3 turtle_console.py -v True -u tbakker -p mypassword -s 2019-01-03 -e 2019-03-03
+  
+  You will then be prompted for the instagram user to save
 ```
 
 ## Config.Json File
