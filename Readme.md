@@ -1,4 +1,4 @@
-## Turtle (Instagram Photo Downloader)
+## Ridley ( A modified Turtle Instagram Photo Downloader)
 
 - It is for downloading your friend's photos and videos with your account.
 - Your username and your password won't be stored.
@@ -12,62 +12,29 @@
 
 - Python 3.6+
 - Selenium
-- PhantomJS
+- panda
 - Chrome Driver for Selenium
-- Gecko Driver for Selenium
+
 
 ## How to install and run
 
 1. Download the source from Github
-    - `git clone https://github.com/serhattsnmz/turtle.git`
-    - `cd turtle`
+    - `git clone https://github.com/trevorbakker-uta/ridley.git`
+    - `cd ridley`
 2. Install requirements
-	- `pip install -r requirements.txt`
-3. Download at least one of following drivers.
-    - Download and install `PhantomJs` (Opsional)
-        - For Linux
-            - Do not use apt-get for downloading PhantomJs!
-            - Wget the latest phantomjs (as per [PhatomJs Download Page](http://phantomjs.org/download.html "PhatomJs Download Page"))
-                - `wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2`
-            - Untar it
-                - `tar xvjf phantomjs-2.1.1-linux-x86_64.tar.bz2`
-            - Moved the phantomjs executable to /usr/bin/ (may need sudo)
-                - `sudo cp /path/to/phantom/untar/bin/phantomjs /usr/bin/`
-        - For Windows
-            - Download the `PhantomJS` with link below :
-                - [PhatomJs Download Page](http://phantomjs.org/download.html "PhatomJs Download Page")
-            - Copy `path\phantomjs-2.1.1-windows\bin\phantomjs.exe` file to `C:\Program Files (x86)\Python36-32\Scripts`
-    - Download and install `ChromeDriver` (Opsional)
-        - For Linux
+	- `pip3 install -r requirements.txt`
+3. Download the Chrome drivers.
+    - Download and install `ChromeDriver`
             - [Download ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/downloads) 
             - Moved the ChromeDriver executable to /usr/bin/ (may need sudo)
-        - For Windows
-            - [Download ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/downloads) 
-            - Copy `path\chromedriver.exe` file to `C:\Program Files (x86)\Python36-32\Scripts`
-    - Download and install `GeckoDriver` for Firefox (Opsional)
-        - For Linux
-            - Wget the lasted GeckoDriver (as per [GeckoDriver Download Page](https://github.com/mozilla/geckodriver/releases))
-                - `wget https://github.com/mozilla/geckodriver/releases/download/v0.18.0/geckodriver-v0.18.0-linux64.tar.gz`
-            - Untar it
-                - `tar -xvzf geckodriver*`
-            - Make it executable
-                - `chmod +x geckodriver`
-            - Moved the geckoDriver executable to /usr/bin/ (may need sudo)
-                - `sudo cp /path/to/geckoDriver /usr/bin/`
-        - For Windows
-            - Download the `GeckoDriver` with link below :
-                - [GeckoDriver Download Page](https://github.com/mozilla/geckodriver/releases)
-            - Copy `path\geckodriver.exe` file to `C:\Program Files (x86)\Python36-32\Scripts`
-4. Run python file with Python 3
-	- `python3 turtle_console.py`
-
+`
 ## Usage
 
-Simply call `python turtle_console.py`
+Simply call `python3 turtle_console.py -v True`
 
-First you have to choose a driver, PhantomJs, Firefox or Chrome.
+Choose the Chrome driver.
 
-It will ask for your Instagram username and password for logging in (If you did not define them in config.js). Then it will ask for a username which user's photo you want to download.
+It will ask for your Instagram username and password for logging in. Then it will ask for a username which user's photo you want to download.
 
 You can download:
 - All user's photos
@@ -90,7 +57,9 @@ optional arguments:
   -l , --list       List of Usernames
   -D , --download   Download choice. [1]Update(Default for list) [2]Full
   -v , --video      Download videos or not. [True]Download [False] Do Not
-                    Download(Default)
+                    Download
+  -s, --start       The start date to start saving posts
+  -e, --end         The end date to start saving posts
 ```
 
 ## Config.Json File
