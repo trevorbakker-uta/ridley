@@ -1,12 +1,9 @@
 ## Ridley ( A modified Turtle Instagram Photo Downloader)
-
-- It is for downloading your friend's photos and videos with your account.
+.
 - Your username and your password won't be stored.
 - Whether or not you have two factor authentication in your Instagram account or not, this will still work.
-- It uses `Selenium` and three different browsers which are `Chrome`, `Firefox` and `PhantomJS`
+- It uses `Selenium` and `Chrome`
     - The driver is being asked at the beginning of the program.
-    - If you want to see what happens -> use `Chrome` or `Firefox`
-    - If you want to view the process in the background -> use `PhantomJs`
 
 ## Requirements
 
@@ -23,6 +20,7 @@
     - `cd ridley`
 2. Install requirements
 	- `pip3 install -r requirements.txt`
+	- `pip3 install panda`
 3. Download the Chrome drivers.
     - Download and install `ChromeDriver`
             - [Download ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/downloads) 
