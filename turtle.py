@@ -10,6 +10,11 @@ import pandas as pd
 import os
 import re
 
+class PostStats:
+    post_count  = 0
+    image_count = 0
+    video_count = 0
+
 class Driver:
     PHANTOM = 1
     CHROME  = 2
@@ -19,6 +24,8 @@ class Download_Choice:
     DOWNLOAD_ALL    = 1
     UPDATE          = 2
     SOME            = 3
+
+stats = {}
 
 class Turtle:
 
@@ -373,12 +380,17 @@ class Turtle:
                 start_datetime = datetime.strptime( self._start, '%Y-%m-%d')
                 time = self._driver.find_element_by_tag_name("time").get_attribute("datetime").split("T")[0] + "_"
                 end_datetime = datetime.strptime( self._end, '%Y-%m-%d')
-              
+
+                
                 # if we've gone far enough back then stop 
                 if post_datetime < start_datetime: break 
 
                 # if we've not gone far enough then skip it
                 if post_datetime > end_datetime: continue
+
+                # Start stat collection
+                if post_datetime not in stats:
+                   stats[post_datetime] = PostStats()
                 
                 # If page has many photos
                 try:
@@ -388,20 +400,25 @@ class Turtle:
                         
                         if is_video:   
                             # Video check
-                            print("1. Found a video\n");
                             if not download_video: continue
 
                             img_link = self._driver.execute_script('return window._sharedData.entry_data.PostPage[0].graphql.shortcode_media.edge_sidecar_to_children.edges[' + str(i) +'].node.video_url')
+                            stats[post_datetime].video_count = stats[post_datetime].video_count + 1
                         else:
                             img_link = self._driver.execute_script('return window._sharedData.entry_data.PostPage[0].graphql.shortcode_media.edge_sidecar_to_children.edges[' + str(i) +'].node.display_url')
+                            stats[post_datetime].image_count = stats[post_datetime].image_count + 1
                         
                         # Create Name
                         s = img_link.split("/")
                         name = time + s[-1].split("?")[0]
 
                         # Download photos
-                        if is_video:    path = self._pic_user_vid_path + "/" + name
-                        else:           path = self._pic_user_path + "/" + name
+                        if is_video:    
+                            path = self._pic_user_vid_path + "/" + name
+                            stats[post_datetime].video_count = stats[post_datetime].video_count + 1
+                        else:           
+                            path = self._pic_user_path + "/" + name
+                            stats[post_datetime].image_count = stats[post_datetime].image_count + 1
                         
                         if not os.path.isfile(path):
                             urlretrieve(img_link, path)
@@ -441,12 +458,14 @@ class Turtle:
                             likes_span = l.find_element_by_css_selector('span').get_attribute("textContent")
                             print(likes_span)
 
-                            likes_str = '<div class="desc">'+'Likes: '+ likes_span +'</div>\n'
+                            likes_str = '<div class="desc">'+'<b>MultiPic</b> Post Likes: '+ likes_span +'</div>\n'
                             self.file.write(likes_str)
 
                         self.file.write("</div>\n")
 
                         self.get_comments(link, pic_user_folder_name)
+
+                        stats[post_datetime].post_count = stats[post_datetime].post_count + 1
 
                 # If page has single photo
                 except:
@@ -509,7 +528,6 @@ class Turtle:
                     likes = self._driver.find_elements_by_class_name("Nm9Fw")
                     for l in likes:
                         likes_span = l.find_element_by_css_selector('span').get_attribute("textContent")
-                        print(likes_span)
 
                         likes_str = '<div class="desc">'+'Likes: '+ likes_span +'</div>\n'
                         self.file.write(likes_str)
@@ -539,6 +557,10 @@ class Turtle:
             self.file.close()
             
             self.result = True
+
+            for key, value in stats.items():
+              print(key, value.post_count, value.image_count, value.video_count )
+
             return download_number
         except Exception as exp:
             self.log.append_exception(exp)
