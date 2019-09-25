@@ -411,6 +411,43 @@ class Turtle:
                                 done = True
                             already_exists_number += 1
 
+                        post_date = self._driver.find_element_by_tag_name("time").get_attribute("datetime").split("T")[0]; 
+                        post_datetime = datetime.strptime( post_date, '%Y-%m-%d')
+                        date_string = post_datetime.strftime('%b %d %Y')
+    
+                        self.file.write("<div class=""gallery"">\n")
+    
+                        if is_video:
+                            videostr = '<video width="320" height="320" controls>'
+                            self.file.write(videostr)
+                            videostr = '<source src="../' + path + '" type="video/mp4">'
+                            self.file.write(videostr)
+                            self.file.write('</video>')
+                        else:
+                            filestr = '<a target="_blank" href=\"' + '../' + path + '">\n'
+                            self.file.write(filestr)
+                            filestr = ' <img src="' + '../' + path + '"alt="'+time+'" width="320" height="320">\n'
+                            self.file.write(filestr)
+                            self.file.write("   </a>\n")
+
+                        p = re.split("[/]",link)
+                        comment_str = p[-2]
+    
+                        comment_str = '<div class="desc"><a href="' +pic_user_folder_name+ '/'+ comment_str +  '.html' + '">' + date_string + ': Caption and Comments</a></div>\n'
+                        self.file.write(comment_str)
+    
+                        likes = self._driver.find_elements_by_class_name("Nm9Fw")
+                        for l in likes:
+                            likes_span = l.find_element_by_css_selector('span').get_attribute("textContent")
+                            print(likes_span)
+
+                            likes_str = '<div class="desc">'+'Likes: '+ likes_span +'</div>\n'
+                            self.file.write(likes_str)
+
+                        self.file.write("</div>\n")
+
+                        self.get_comments(link, pic_user_folder_name)
+
                 # If page has single photo
                 except:
                     try:
