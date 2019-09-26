@@ -26,6 +26,8 @@ class Download_Choice:
     SOME            = 3
 
 stats = {}
+followers_count = 0
+following_count = 0
 
 class Turtle:
 
@@ -37,6 +39,7 @@ class Turtle:
     _pic_user_vid_path  = ""
 
     file = ""
+    post_history = ""
 
     _start = ""
     _end   = ""
@@ -177,6 +180,11 @@ class Turtle:
             self.log.append("Getting user...")
             self._driver.get("https://www.instagram.com/" + pic_user)
 
+            follower = self._driver.find_element_by_class_name("-nal3")
+            follower = self._driver.find_element_by_class_name("-nal3")
+            follower_count = follower.find_element_by_css_selector('span').get_attribute("textContent")
+            print(follower_count)
+
             self.log.append("Listing stories...")
             
             photo_total = int(self._driver.find_element_by_class_name("g47SY").text.replace(".", "").replace(",",""))
@@ -242,6 +250,7 @@ class Turtle:
 
 
             self.file = open( path + "_index.html", "w+" )
+            self.post_history = open( path + "_post_history.csv", "w+" )
             self.file.write("<!DOCTYPE html>\n")
             self.file.write("<html>\n")
             self.file.write("<head>\n")
@@ -272,7 +281,8 @@ class Turtle:
             timestr = self._start + " - " + self._end;
             self.file.write(timestr)
             self.file.write("</h2>\n")
-            self.file.write("</div>\n")
+            self.file.write('<a href="' + pic_user + '_post_history.csv'+ '">Post History CSV File</a>')
+            self.file.write("</div><br>\n")
 
             return True;
 
@@ -395,6 +405,7 @@ class Turtle:
                    print ( 'Added' )
                    print ( post_datetime )
                 
+                stats[post_datetime].post_count = stats[post_datetime].post_count + 1
                 # If page has many photos
                 try:
                     img_count = self._driver.execute_script('return window._sharedData.entry_data.PostPage[0].graphql.shortcode_media.edge_sidecar_to_children.edges.length')
@@ -418,10 +429,8 @@ class Turtle:
                         # Download photos
                         if is_video:    
                             path = self._pic_user_vid_path + "/" + name
-                            stats[post_datetime].video_count = stats[post_datetime].video_count + 1
                         else:           
                             path = self._pic_user_path + "/" + name
-                            stats[post_datetime].image_count = stats[post_datetime].image_count + 1
                         
                         if not os.path.isfile(path):
                             urlretrieve(img_link, path)
@@ -468,7 +477,7 @@ class Turtle:
 
                         self.get_comments(link, pic_user_folder_name)
 
-                        stats[post_datetime].post_count = stats[post_datetime].post_count + 1
+                        #stats[post_datetime].post_count = stats[post_datetime].post_count + 1
 
                 # If page has single photo
                 except:
@@ -540,7 +549,6 @@ class Turtle:
                     self.file.write("</div>\n")
 
                     self.get_comments(link, pic_user_folder_name)
-                    stats[post_datetime].post_count = stats[post_datetime].post_count + 1
 
                 # Info
                 self.log.append("> " + str(idx + 1) + " / " + str(total_download) + " stories downloaded...")
@@ -582,7 +590,6 @@ class Turtle:
             self.file.write("</style>")
             self.file.write("</head>")
             self.file.write("<body>")
-            self.file.write("<h2>HTML Table</h2>")
 
             self.file.write("<table>")
             self.file.write("<tr>")
@@ -592,6 +599,30 @@ class Turtle:
             self.file.write("<th>Video Count</th>")
             self.file.write("</tr>")
 
+            # september 3rd is the 246th day
+            for day in range(3, 247):
+               self.post_history.write(',')
+               daystr = datetime.fromordinal(day)
+               daystr = daystr.replace( year=2019 )
+               self.post_history.write(daystr.strftime('%Y-%m-%d'))
+
+            self.post_history.write('\n')
+            self.post_history.write(pic_user_folder_name)
+                
+            for day in range(3, 247):
+               self.post_history.write(',')
+               daystr = datetime.fromordinal(day)
+               daystr = daystr.replace( year=2019 )
+               keystr = daystr.strftime('%Y-%m-%d')
+               value = stats.get(daystr)
+               if not value:
+                  self.post_history.write('0')
+                  print(keystr)
+               else:
+                  self.post_history.write( str( stats[daystr].post_count ) )
+              
+
+             
             for key, value in stats.items():
               post_datetime = key.strftime('%Y-%m-%d')
               print(post_datetime, value.post_count, value.image_count, value.video_count )
@@ -608,6 +639,7 @@ class Turtle:
 
 
             self.file.close()
+            self.post_history.close();
             
             self.result = True
 
