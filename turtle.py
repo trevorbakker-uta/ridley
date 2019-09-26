@@ -376,6 +376,7 @@ class Turtle:
 
                 # Get Photo Taken Date
                 post_date = self._driver.find_element_by_tag_name("time").get_attribute("datetime").split("T")[0]; 
+                print( post_date );
                 post_datetime = datetime.strptime( post_date, '%Y-%m-%d')
                 start_datetime = datetime.strptime( self._start, '%Y-%m-%d')
                 time = self._driver.find_element_by_tag_name("time").get_attribute("datetime").split("T")[0] + "_"
@@ -391,6 +392,8 @@ class Turtle:
                 # Start stat collection
                 if post_datetime not in stats:
                    stats[post_datetime] = PostStats()
+                   print ( 'Added' )
+                   print ( post_datetime )
                 
                 # If page has many photos
                 try:
@@ -512,12 +515,14 @@ class Turtle:
                         videostr = '<source src="../' + path + '" type="video/mp4">'
                         self.file.write(videostr)
                         self.file.write('</video>')
+                        stats[post_datetime].video_count = stats[post_datetime].video_count + 1
                     else:
                         filestr = '<a target="_blank" href=\"' + '../' + path + '">\n'
                         self.file.write(filestr)
                         filestr = ' <img src="' + '../' + path + '"alt="'+time+'" width="320" height="320">\n'
                         self.file.write(filestr)
                         self.file.write("   </a>\n")
+                        stats[post_datetime].image_count = stats[post_datetime].image_count + 1
 
                     p = re.split("[/]",link)
                     comment_str = p[-2]
@@ -535,6 +540,7 @@ class Turtle:
                     self.file.write("</div>\n")
 
                     self.get_comments(link, pic_user_folder_name)
+                    stats[post_datetime].post_count = stats[post_datetime].post_count + 1
 
                 # Info
                 self.log.append("> " + str(idx + 1) + " / " + str(total_download) + " stories downloaded...")
@@ -554,12 +560,56 @@ class Turtle:
             self.log.append("$ Already exists          : " + str(already_exists_number))
             self.log.append("-------------------------------")
 
+            self.file.write("<!DOCTYPE html>")
+            self.file.write("<html>")
+            self.file.write("<head>")
+            self.file.write("<style>")
+            self.file.write("table {")
+            self.file.write("font-family: arial, sans-serif;")
+            self.file.write("border-collapse: collapse;")
+            self.file.write("width: 100%;")
+            self.file.write("}")
+            self.file.write("")
+            self.file.write("td, th {")
+            self.file.write("border: 1px solid #dddddd;")
+            self.file.write("text-align: left;")
+            self.file.write("padding: 8px;")
+            self.file.write("}")
+            self.file.write("")
+            self.file.write("tr:nth-child(even) {")
+            self.file.write("background-color: #dddddd;")
+            self.file.write("}")
+            self.file.write("</style>")
+            self.file.write("</head>")
+            self.file.write("<body>")
+            self.file.write("<h2>HTML Table</h2>")
+
+            self.file.write("<table>")
+            self.file.write("<tr>")
+            self.file.write("<th>Date</th>")
+            self.file.write("<th>Post Count</th>")
+            self.file.write("<th>Image Count</th>")
+            self.file.write("<th>Video Count</th>")
+            self.file.write("</tr>")
+
+            for key, value in stats.items():
+              post_datetime = key.strftime('%Y-%m-%d')
+              print(post_datetime, value.post_count, value.image_count, value.video_count )
+              self.file.write("<tr>")
+              tablestr = '<td>' + post_datetime + '</td>'
+              self.file.write(tablestr)
+              tablestr = '<td>' + str(value.post_count) + '</td>'
+              self.file.write(tablestr)
+              tablestr = '<td>' + str(value.image_count) + '</td>'
+              self.file.write(tablestr)
+              tablestr = '<td>' + str(value.video_count) + '</td>'
+              self.file.write(tablestr)
+              self.file.write("</tr>")
+
+
             self.file.close()
             
             self.result = True
-
-            for key, value in stats.items():
-              print(key, value.post_count, value.image_count, value.video_count )
 
             return download_number
         except Exception as exp:
